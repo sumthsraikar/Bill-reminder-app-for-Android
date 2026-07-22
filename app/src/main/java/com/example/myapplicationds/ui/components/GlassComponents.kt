@@ -1,5 +1,6 @@
 package com.example.myapplicationds.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -30,25 +31,25 @@ import androidx.compose.ui.unit.sp
 import com.example.myapplicationds.ui.theme.*
 
 /**
- * Premium Black Glassmorphism Card Container (24dp rounded corners, thin glass border)
+ * Premium Black Glassmorphism Card Container (24dp rounded corners, thin 8% white glass border)
  */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(24.dp),
-    backgroundColor: Color = GlassCardBackground,
-    borderColor: Color = GlassBorderWhite,
+    backgroundColor: Color = Color(0x1F141418), // 10-15% transparency
+    borderColor: Color = Color.White.copy(alpha = 0.08f),
     borderWidth: Dp = 1.dp,
-    contentPadding: PaddingValues = PaddingValues(20.dp),
+    contentPadding: PaddingValues = PaddingValues(16.dp),
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val baseModifier = modifier
         .shadow(
-            elevation = 12.dp,
+            elevation = 6.dp,
             shape = shape,
             ambientColor = Color.Black,
-            spotColor = Color.Black
+            spotColor = Color.Black.copy(alpha = 0.4f)
         )
         .clip(shape)
         .background(backgroundColor)
@@ -64,7 +65,7 @@ fun GlassCard(
 }
 
 /**
- * Glass Search Bar with 18dp rounded corners and high contrast placeholder
+ * Glass Search Bar with 56dp height, 18dp rounded corners, brighter border & crisp placeholder contrast
  */
 @Composable
 fun GlassSearchTextField(
@@ -76,10 +77,10 @@ fun GlassSearchTextField(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(54.dp)
-            .shadow(6.dp, RoundedCornerShape(18.dp))
+            .height(56.dp)
+            .shadow(4.dp, RoundedCornerShape(18.dp))
             .border(
-                BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
+                BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)),
                 RoundedCornerShape(18.dp)
             ),
         shape = RoundedCornerShape(18.dp),
@@ -94,7 +95,7 @@ fun GlassSearchTextField(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
-                tint = TextSecondaryDark,
+                tint = PrimaryBlueLight,
                 modifier = Modifier.size(20.dp)
             )
 
@@ -107,8 +108,8 @@ fun GlassSearchTextField(
                 if (value.isEmpty()) {
                     Text(
                         text = placeholderText,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = TextSecondaryDark.copy(alpha = 0.7f)
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondaryDark
                     )
                 }
                 TextField(
@@ -124,7 +125,7 @@ fun GlassSearchTextField(
                         focusedTextColor = TextPrimaryDark,
                         unfocusedTextColor = TextPrimaryDark
                     ),
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = TextPrimaryDark),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimaryDark),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -132,7 +133,7 @@ fun GlassSearchTextField(
             if (value.isNotEmpty()) {
                 IconButton(
                     onClick = { onValueChange("") },
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
@@ -148,7 +149,7 @@ fun GlassSearchTextField(
 
 /**
  * Redesigned Pill-Style Tab Component
- * Smooth selection animation, thin blue indicator, circular count badges (hidden if count == 0).
+ * Smooth selection animation, thin indicator, circular count badges (hidden if count == 0).
  */
 @Composable
 fun GlassPillTabs(
@@ -177,8 +178,8 @@ fun GlassPillTabs(
             tabs.forEachIndexed { index, (label, count) ->
                 val isSelected = selectedTabIndex == index
 
-                val animBackground = if (isSelected) Color(0x333B82F6) else Color.Transparent
-                val animBorder = if (isSelected) BorderStroke(1.dp, PrimaryBlue.copy(alpha = 0.6f)) else null
+                val targetBg = if (isSelected) Color(0x333B82F6) else Color.Transparent
+                val animBackground by animateColorAsState(targetBg, animationSpec = tween(250), label = "tabBg")
 
                 Box(
                     modifier = Modifier
@@ -187,7 +188,7 @@ fun GlassPillTabs(
                         .clip(RoundedCornerShape(22.dp))
                         .background(animBackground)
                         .then(
-                            if (animBorder != null) Modifier.border(animBorder, RoundedCornerShape(22.dp)) else Modifier
+                            if (isSelected) Modifier.border(BorderStroke(1.dp, PrimaryBlue.copy(alpha = 0.5f)), RoundedCornerShape(22.dp)) else Modifier
                         )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
@@ -238,7 +239,7 @@ fun GlassPillTabs(
 }
 
 /**
- * Filled Emerald Green Glass Mark as Paid Button
+ * Filled Emerald Green Glass Mark as Paid Button (Soft 50% reduced glow)
  */
 @Composable
 fun GlassMarkPaidButton(
@@ -249,7 +250,7 @@ fun GlassMarkPaidButton(
     Surface(
         modifier = modifier
             .height(44.dp)
-            .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = StatusPaid)
+            .shadow(4.dp, RoundedCornerShape(14.dp), spotColor = StatusPaid.copy(alpha = 0.25f)) // 50% reduced glow
             .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick),
         color = StatusPaid,
@@ -279,7 +280,7 @@ fun GlassMarkPaidButton(
 }
 
 /**
- * Circular Glass Icon Button (for Edit & Delete actions)
+ * Circular Glass Icon Button (48dp minimum touch target for accessibility & header buttons)
  */
 @Composable
 fun GlassIconButton(
@@ -292,7 +293,7 @@ fun GlassIconButton(
 ) {
     Box(
         modifier = modifier
-            .size(42.dp)
+            .size(48.dp) // 48dp accessibility target
             .clip(CircleShape)
             .background(containerColor)
             .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), CircleShape)
@@ -303,7 +304,8 @@ fun GlassIconButton(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = tint,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(22.dp)
         )
     }
 }
+

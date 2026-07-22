@@ -1,15 +1,17 @@
 package com.example.myapplicationds.ui.navigation
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,18 +32,18 @@ fun BottomNavBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(66.dp)
+                .height(62.dp) // Optimized height
                 .shadow(
-                    elevation = 20.dp,
+                    elevation = 16.dp,
                     shape = RoundedCornerShape(28.dp),
                     ambientColor = Color.Black,
-                    spotColor = PrimaryBlue
+                    spotColor = PrimaryBlue.copy(alpha = 0.5f)
                 )
                 .clip(RoundedCornerShape(28.dp))
                 .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)), RoundedCornerShape(28.dp)),
@@ -58,7 +60,9 @@ fun BottomNavBar(
                 bottomNavItems.forEach { screen ->
                     val selected = currentRoute == screen.route
 
-                    val activeBg = if (selected) Color(0xFF3B82F6) else Color.Transparent
+                    val targetBg = if (selected) PrimaryBlue else Color.Transparent
+                    val activeBg by animateColorAsState(targetBg, animationSpec = tween(250), label = "navTabBg")
+
                     val activeIconColor = if (selected) Color.White else TextSecondaryDark
                     val activeTextColor = if (selected) Color.White else TextSecondaryDark
 
@@ -105,4 +109,5 @@ fun BottomNavBar(
         }
     }
 }
+
 
