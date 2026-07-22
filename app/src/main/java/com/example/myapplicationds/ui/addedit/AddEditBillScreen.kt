@@ -30,6 +30,7 @@ import com.example.myapplicationds.ui.theme.CategoryColors
 import java.text.SimpleDateFormat
 import java.util.*
 
+@Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditBillScreen(

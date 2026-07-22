@@ -33,7 +33,6 @@ fun SettingsScreen(
     val theme by viewModel.theme.collectAsState()
     val notificationEnabled by viewModel.notificationEnabled.collectAsState()
     val reminderDaysBefore by viewModel.reminderDaysBefore.collectAsState()
-    val language by viewModel.language.collectAsState()
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()

@@ -1,6 +1,5 @@
 package com.example.myapplicationds.ui.home
 
-import android.text.format.DateUtils
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
