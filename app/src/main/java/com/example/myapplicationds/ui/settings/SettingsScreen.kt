@@ -28,10 +28,13 @@ import com.example.myapplicationds.ui.components.GlassCard
 import com.example.myapplicationds.ui.theme.*
 import kotlinx.coroutines.launch
 
+import com.example.myapplicationds.ui.components.GlassIconButton
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel
+    viewModel: SettingsViewModel,
+    onNavigateBack: () -> Unit = {}
 ) {
     val currency by viewModel.currency.collectAsState()
     val theme by viewModel.theme.collectAsState()
@@ -96,9 +99,16 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                GlassIconButton(
+                    icon = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    onClick = onNavigateBack,
+                    tint = TextPrimaryDark
+                )
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "Settings",
                     style = MaterialTheme.typography.headlineMedium,

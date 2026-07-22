@@ -42,6 +42,14 @@ class StatisticsViewModel @Inject constructor(
     val overdueBillsCount: StateFlow<Int> = allBills.map { list -> list.count { it.paymentStatus == "OVERDUE" } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    val totalCredited: StateFlow<Double> = allBills.map { list ->
+        list.filter { it.transactionType == "CREDIT" }.sumOf { it.amount }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    val totalDebited: StateFlow<Double> = allBills.map { list ->
+        list.filter { it.transactionType == "DEBIT" }.sumOf { it.amount }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
     val monthlySpending: StateFlow<Double> = paymentHistory.map { history ->
         val currentMonth = Calendar.getInstance().get(Calendar.MONTH)
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)

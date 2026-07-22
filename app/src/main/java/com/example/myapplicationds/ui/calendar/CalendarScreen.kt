@@ -10,8 +10,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,7 +31,8 @@ import java.util.*
 @Composable
 fun CalendarScreen(
     viewModel: CalendarViewModel,
-    onNavigateToEditBill: (Long) -> Unit
+    onNavigateToEditBill: (Long) -> Unit,
+    onNavigateBack: () -> Unit = {}
 ) {
     val currentMonthCal by viewModel.currentMonthCal.collectAsState()
     val selectedDateMillis by viewModel.selectedDateMillis.collectAsState()
@@ -70,9 +70,16 @@ fun CalendarScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                GlassIconButton(
+                    icon = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    onClick = onNavigateBack,
+                    tint = TextPrimaryDark
+                )
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "Bill Calendar",
                     style = MaterialTheme.typography.headlineMedium,

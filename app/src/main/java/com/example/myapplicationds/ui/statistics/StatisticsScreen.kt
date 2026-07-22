@@ -26,10 +26,13 @@ import com.example.myapplicationds.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.myapplicationds.ui.components.GlassIconButton
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
-    viewModel: StatisticsViewModel
+    viewModel: StatisticsViewModel,
+    onNavigateBack: () -> Unit = {}
 ) {
     val currency by viewModel.currency.collectAsState()
     val totalBills by viewModel.totalBillsCount.collectAsState()
@@ -38,7 +41,8 @@ fun StatisticsScreen(
     val overdueBills by viewModel.overdueBillsCount.collectAsState()
     val monthlySpending by viewModel.monthlySpending.collectAsState()
     val categoryExpenses by viewModel.categoryExpenses.collectAsState()
-    val paymentHistory by viewModel.paymentHistory.collectAsState()
+    val totalCredited by viewModel.totalCredited.collectAsState()
+    val totalDebited by viewModel.totalDebited.collectAsState()
 
     val dateFormat = remember { SimpleDateFormat("dd MMM, yyyy • HH:mm", Locale.getDefault()) }
 
@@ -48,9 +52,16 @@ fun StatisticsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                GlassIconButton(
+                    icon = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    onClick = onNavigateBack,
+                    tint = TextPrimaryDark
+                )
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "Analytics & Reports",
                     style = MaterialTheme.typography.headlineMedium,
@@ -69,26 +80,58 @@ fun StatisticsScreen(
                 .padding(horizontal = 24.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Spending Summary Card with Gradient Glass
-            GlassCard(
+            // Credited vs Debited Cash Flow Summary Cards
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                backgroundColor = Color(0x1F3B82F6),
-                borderColor = PrimaryBlue.copy(alpha = 0.3f),
-                contentPadding = PaddingValues(24.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text(
-                    text = "THIS MONTH'S SPENDING",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = PrimaryBlueLight,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "$currency${String.format(Locale.getDefault(), "%.2f", monthlySpending)}",
-                    style = BillAmountStyle,
-                    color = TextPrimaryDark
-                )
+                // Credited (Income) Glass Card
+                GlassCard(
+                    modifier = Modifier.weight(1f),
+                    backgroundColor = Color(0x1F10B981),
+                    borderColor = StatusPaid.copy(alpha = 0.3f),
+                    contentPadding = PaddingValues(16.dp)
+                ) {
+                    Text(
+                        text = "📥 CREDITED (INCOME)",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = StatusPaid,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "+$currency${String.format(Locale.getDefault(), "%,.2f", totalCredited)}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = StatusPaid,
+                        fontSize = 16.sp
+                    )
+                }
+
+                // Debited (Expenses) Glass Card
+                GlassCard(
+                    modifier = Modifier.weight(1f),
+                    backgroundColor = Color(0x1FEF4444),
+                    borderColor = StatusOverdue.copy(alpha = 0.3f),
+                    contentPadding = PaddingValues(16.dp)
+                ) {
+                    Text(
+                        text = "📤 DEBITED (EXPENSES)",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = StatusOverdue,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "-$currency${String.format(Locale.getDefault(), "%,.2f", totalDebited)}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimaryDark,
+                        fontSize = 16.sp
+                    )
+                }
             }
 
             // Stats Metric Grid Cards

@@ -36,23 +36,7 @@ fun NavGraph(
     )
 
     Scaffold(
-        containerColor = com.example.myapplicationds.ui.theme.DarkBackground,
-        bottomBar = {
-            if (showBottomBar) {
-                BottomNavBar(
-                    currentRoute = currentRoute,
-                    onNavigate = { screen ->
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                )
-            }
-        }
+        containerColor = com.example.myapplicationds.ui.theme.DarkBackground
     ) { paddingValues ->
         NavHost(
             navController = navController,
@@ -68,6 +52,12 @@ fun NavGraph(
                     },
                     onNavigateToEditBill = { billId ->
                         navController.navigate(Screen.AddEditBill.createRoute(billId))
+                    },
+                    onNavigateToCalendar = {
+                        navController.navigate(Screen.Calendar.route)
+                    },
+                    onNavigateToAnalytics = {
+                        navController.navigate(Screen.Statistics.route)
                     },
                     onNavigateToSettings = {
                         navController.navigate(Screen.Settings.route)
@@ -98,18 +88,25 @@ fun NavGraph(
                     viewModel = viewModel,
                     onNavigateToEditBill = { billId ->
                         navController.navigate(Screen.AddEditBill.createRoute(billId))
-                    }
+                    },
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
             composable(Screen.Statistics.route) {
                 val viewModel = hiltViewModel<StatisticsViewModel>()
-                StatisticsScreen(viewModel = viewModel)
+                StatisticsScreen(
+                    viewModel = viewModel,
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
 
             composable(Screen.Settings.route) {
                 val viewModel = hiltViewModel<SettingsViewModel>()
-                SettingsScreen(viewModel = viewModel)
+                SettingsScreen(
+                    viewModel = viewModel,
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
         }
     }

@@ -43,6 +43,8 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onNavigateToAddBill: () -> Unit,
     onNavigateToEditBill: (Long) -> Unit,
+    onNavigateToCalendar: () -> Unit,
+    onNavigateToAnalytics: () -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -77,60 +79,32 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            // Header with 48dp action buttons & 12dp spacing
+            // Top Header: "My Bills" + Analytics 📊 & Settings ⚙️
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0x26FFFFFF))
-                            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)), RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.app_logo),
-                            contentDescription = "BillBuddy Logo",
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                        )
-                    }
+                Text(
+                    text = "My Bills",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimaryDark,
+                    fontSize = 26.sp
+                )
 
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column {
-                        Text(
-                            text = "BillBuddy",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimaryDark
-                        )
-                        Text(
-                            text = "Smart Bill Manager",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TextSecondaryDark
-                        )
-                    }
-                }
-
+                // Top Right Action Buttons (Analytics & Settings)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     GlassIconButton(
-                        icon = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        onClick = { },
+                        icon = Icons.Default.BarChart,
+                        contentDescription = "Analytics",
+                        onClick = onNavigateToAnalytics,
                         tint = TextPrimaryDark
                     )
 
@@ -144,26 +118,35 @@ fun HomeScreen(
             }
         },
         floatingActionButton = {
-            // Raised FAB positioned 24–32dp above bottom navigation bar (96dp bottom margin)
+            // Pill Floating Action Button (+ New Bill) matching reference screenshot
             Surface(
                 onClick = onNavigateToAddBill,
                 modifier = Modifier
-                    .padding(bottom = 96.dp, end = 8.dp)
-                    .size(64.dp)
-                    .shadow(12.dp, CircleShape, spotColor = PrimaryBlue)
-                    .clip(CircleShape)
-                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)), CircleShape),
-                color = PrimaryBlue
+                    .padding(bottom = 24.dp, end = 16.dp)
+                    .height(48.dp)
+                    .shadow(12.dp, RoundedCornerShape(24.dp), spotColor = PrimaryBlue)
+                    .clip(RoundedCornerShape(24.dp)),
+                color = PrimaryBlue,
+                shape = RoundedCornerShape(24.dp)
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Add Bill",
+                        contentDescription = "New Bill",
                         tint = Color.White,
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "New Bill",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 15.sp
                     )
                 }
             }
@@ -175,9 +158,160 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Glass Search Bar (56dp height)
+            // Unified Dark Summary Container matching reference screenshot
+            val currentMonthName = remember { SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date()) }
+            
             Box(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp)
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color(0xFF16161C),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        // Summary Container Header: Calendar Icon + Month String + "View >" Link
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.CalendarToday,
+                                    contentDescription = null,
+                                    tint = PrimaryBlueLight,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = currentMonthName,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimaryDark,
+                                    fontSize = 15.sp
+                                )
+                            }
+
+                            Text(
+                                text = "View ›",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = PrimaryBlueLight,
+                                fontSize = 13.sp,
+                                modifier = Modifier.clickable(onClick = onNavigateToCalendar)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // 3 Summary Grid Cards (Still to Pay, Upcoming, Overdue)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Still to Pay Card (Blue Container)
+                            Surface(
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(14.dp),
+                                color = Color(0xFF162033),
+                                border = BorderStroke(1.dp, PrimaryBlue.copy(alpha = 0.2f))
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "Still to Pay",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = TextSecondaryDark,
+                                        fontSize = 11.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "$currency${String.format(Locale.getDefault(), "%,.0f", upcomingTotal + overdueTotal)}",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PrimaryBlueLight,
+                                        fontSize = 17.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+
+                            // Upcoming Card (Dark Container)
+                            Surface(
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(14.dp),
+                                color = Color(0xFF141922),
+                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.06f))
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "Upcoming ($upcomingCount)",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = TextSecondaryDark,
+                                        fontSize = 11.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "$currency${String.format(Locale.getDefault(), "%,.0f", upcomingTotal)}",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF60A5FA),
+                                        fontSize = 17.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+
+                            // Overdue Card (Reddish Container)
+                            Surface(
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(14.dp),
+                                color = Color(0xFF261619),
+                                border = BorderStroke(1.dp, StatusOverdue.copy(alpha = 0.2f))
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "Overdue ($overdueCount)",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = TextSecondaryDark,
+                                        fontSize = 11.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "$currency${String.format(Locale.getDefault(), "%,.0f", overdueTotal)}",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (overdueTotal > 0) StatusOverdue else Color(0xFFEF4444).copy(alpha = 0.7f),
+                                        fontSize = 17.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Glass Search Bar
+            Box(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 2.dp)
             ) {
                 GlassSearchTextField(
                     value = searchQuery,
@@ -188,83 +322,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Home Summary Cards Component (3 equal glass cards above tabs)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Upcoming Glass Card
-                GlassCard(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Schedule, contentDescription = null, tint = StatusUpcoming, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Upcoming", style = MaterialTheme.typography.labelSmall, color = TextSecondaryDark, fontSize = 11.sp)
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "$currency${String.format(Locale.getDefault(), "%.0f", upcomingTotal)}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimaryDark,
-                        fontSize = 15.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                // Overdue Glass Card
-                GlassCard(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = StatusOverdue, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Overdue", style = MaterialTheme.typography.labelSmall, color = TextSecondaryDark, fontSize = 11.sp)
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "$currency${String.format(Locale.getDefault(), "%.0f", overdueTotal)}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (overdueTotal > 0) StatusOverdue else TextPrimaryDark,
-                        fontSize = 15.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                // Paid Glass Card
-                GlassCard(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = StatusPaid, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Paid", style = MaterialTheme.typography.labelSmall, color = TextSecondaryDark, fontSize = 11.sp)
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "$currency${String.format(Locale.getDefault(), "%.0f", paidTotal)}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimaryDark,
-                        fontSize = 15.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Redesigned Pill-style Tabs with Circular Count Badges
+            // Filter Tabs with Circular Count Badges
             val tabs = listOf(
                 "Upcoming" to upcomingCount,
                 "Overdue" to overdueCount,
@@ -272,7 +330,7 @@ fun HomeScreen(
             )
 
             Box(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 2.dp)
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 2.dp)
             ) {
                 GlassPillTabs(
                     tabs = tabs,
@@ -281,7 +339,7 @@ fun HomeScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Bills List / Enhanced Empty State
             if (bills.isEmpty()) {
@@ -505,7 +563,7 @@ fun BillCardItem(
         else -> "$diffDays Days Left" to StatusPaid
     }
 
-    GlassCard(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .graphicsLayer {
@@ -521,82 +579,83 @@ fun BillCardItem(
                     }
                 )
             },
-        contentPadding = PaddingValues(16.dp) // Optimized 10-15% reduced padding
+        shape = RoundedCornerShape(20.dp),
+        color = Color(0xFF16161C),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            // Header Row: Category Icon, Title (up to 3 lines), Category text (no emoji), Days Left badge
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Row 1: Circular Category Icon + Title/Category + Translucent "X days left" Badge
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
                     modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Category Vector Icon Container
+                    // Circular Category Vector Icon Container
                     Box(
                         modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(bill.color).copy(alpha = 0.15f))
-                            .border(
-                                BorderStroke(1.dp, Color(bill.color).copy(alpha = 0.3f)),
-                                RoundedCornerShape(14.dp)
-                            ),
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(Color(bill.color).copy(alpha = 0.18f))
+                            .border(BorderStroke(1.dp, Color(bill.color).copy(alpha = 0.3f)), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = getCategoryIconByName(bill.category, bill.icon),
                             contentDescription = bill.category,
                             tint = Color(bill.color),
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = bill.billName,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimaryDark,
-                            maxLines = 3,
+                            fontSize = 15.sp,
+                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
                         Spacer(modifier = Modifier.height(2.dp))
-                        // Display clean monochrome category name without emoji
                         Text(
                             text = bill.category,
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondaryDark
+                            color = TextSecondaryDark,
+                            fontSize = 12.sp
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Days Left Badge
+                // Translucent "X days left" Badge
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(12.dp),
                     color = remainingBadgeColor.copy(alpha = 0.15f),
-                    border = BorderStroke(1.dp, remainingBadgeColor.copy(alpha = 0.3f))
+                    border = BorderStroke(1.dp, remainingBadgeColor.copy(alpha = 0.25f))
                 ) {
                     Text(
                         text = remainingBadgeText,
                         style = MaterialTheme.typography.labelSmall,
                         color = remainingBadgeColor,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
             }
 
-            // Amount Section with Credited (+) vs Debited (-) styling
+            // Row 2: Large Bold Amount (e.g. ₹65 / ₹12,000 / +₹50,000)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -605,8 +664,8 @@ fun BillCardItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     val isCredit = bill.transactionType == "CREDIT"
                     Text(
-                        text = "${if (isCredit) "+" else "-"}$currency${String.format(Locale.getDefault(), "%.2f", bill.amount)}",
-                        style = MaterialTheme.typography.headlineSmall,
+                        text = "${if (isCredit) "+" else ""}$currency${String.format(Locale.getDefault(), "%,.0f", bill.amount)}",
+                        style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         fontSize = 28.sp,
                         color = if (isCredit) StatusPaid else TextPrimaryDark
@@ -630,106 +689,44 @@ fun BillCardItem(
                         }
                     }
                 }
-
-                // Frequency Chip beside amount / due date
-                if (bill.recurringType != "None") {
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = Color(0x1F3B82F6),
-                        border = BorderStroke(1.dp, PrimaryBlue.copy(alpha = 0.3f))
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Repeat,
-                                contentDescription = null,
-                                tint = PrimaryBlueLight,
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = bill.recurringType,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = PrimaryBlueLight,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 11.sp
-                            )
-                        }
-                    }
-                }
             }
 
-
-            // Due Date & Reminder Row in Premium Glass Chip
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                color = Color(0x18FFFFFF),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.06f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    // Due Date
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.CalendarToday,
-                            contentDescription = null,
-                            tint = TextSecondaryDark,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Due: $formattedDueDate",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondaryDark,
-                            fontSize = 12.sp
-                        )
-                    }
-
-                    // Glass Reminder Chip
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Notifications,
-                            contentDescription = null,
-                            tint = PrimaryBlueLight,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Reminder • $formattedReminderDate • ${bill.reminderTime}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextMutedDark,
-                            fontSize = 11.sp
-                        )
-                    }
-                }
-            }
-
-            HorizontalDivider(color = Color.White.copy(alpha = 0.06f), modifier = Modifier.padding(vertical = 2.dp))
-
-            // Action Buttons Row (Mark Paid + Edit/Delete circular buttons)
+            // Row 3: DUE DATE label & Date String on Left + Compact Dark Action Button on Right
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Bottom
             ) {
-                if (bill.paymentStatus != "PAID") {
-                    GlassMarkPaidButton(
-                        onClick = onMarkAsPaid,
-                        text = "✓ Mark as Paid",
-                        modifier = Modifier.weight(1f)
+                Column {
+                    Text(
+                        text = "DUE DATE",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TextMutedDark,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = formattedDueDate,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimaryDark,
+                        fontSize = 14.sp
+                    )
                 }
 
                 Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    if (bill.paymentStatus != "PAID") {
+                        GlassMarkPaidButton(
+                            onClick = onMarkAsPaid,
+                            text = "Mark as Paid"
+                        )
+                    }
+
                     GlassIconButton(
                         icon = Icons.Default.Edit,
                         contentDescription = "Edit Bill",
@@ -744,6 +741,25 @@ fun BillCardItem(
                         tint = StatusOverdue
                     )
                 }
+            }
+
+            HorizontalDivider(color = Color.White.copy(alpha = 0.08f), modifier = Modifier.padding(vertical = 2.dp))
+
+            // Footer Row: 🔔 Reminder: 05 Aug 2026, 09:00 AM
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.NotificationsNone,
+                    contentDescription = null,
+                    tint = TextSecondaryDark,
+                    modifier = Modifier.size(15.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Reminder: $formattedReminderDate, ${bill.reminderTime}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondaryDark,
+                    fontSize = 12.sp
+                )
             }
         }
     }

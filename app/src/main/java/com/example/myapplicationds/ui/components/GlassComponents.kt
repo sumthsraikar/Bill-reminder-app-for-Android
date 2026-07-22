@@ -239,7 +239,7 @@ fun GlassPillTabs(
 }
 
 /**
- * Filled Emerald Green Glass Mark as Paid Button (Soft 50% reduced glow)
+ * Sleek Dark Mark as Paid Button (matching reference screenshot)
  */
 @Composable
 fun GlassMarkPaidButton(
@@ -249,31 +249,24 @@ fun GlassMarkPaidButton(
 ) {
     Surface(
         modifier = modifier
-            .height(44.dp)
-            .shadow(4.dp, RoundedCornerShape(14.dp), spotColor = StatusPaid.copy(alpha = 0.25f)) // 50% reduced glow
-            .clip(RoundedCornerShape(14.dp))
+            .height(38.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)), RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
-        color = StatusPaid,
-        shape = RoundedCornerShape(14.dp)
+        color = Color(0xFF0D0D12),
+        shape = RoundedCornerShape(10.dp)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
-                fontSize = 14.sp
+                fontSize = 13.sp
             )
         }
     }
