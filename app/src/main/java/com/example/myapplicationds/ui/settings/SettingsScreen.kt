@@ -18,6 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.myapplicationds.R
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
 import com.example.myapplicationds.ui.theme.StatusOverdue
 import kotlinx.coroutines.launch
 
@@ -357,7 +360,21 @@ fun SettingsScreen(
     if (showAboutDialog) {
         AlertDialog(
             onDismissRequest = { showAboutDialog = false },
-            title = { Text("BillBuddy v1.0") },
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.foundation.Image(
+                        painter = painterResource(id = R.drawable.app_logo),
+                        contentDescription = "BillBuddy Logo",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("BillBuddy v1.0", fontWeight = FontWeight.Bold)
+                }
+            },
             text = {
                 Column {
                     Text(
