@@ -36,6 +36,7 @@ fun NavGraph(
     )
 
     Scaffold(
+        containerColor = com.example.myapplicationds.ui.theme.DarkBackground,
         bottomBar = {
             if (showBottomBar) {
                 BottomNavBar(

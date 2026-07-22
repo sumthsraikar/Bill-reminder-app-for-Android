@@ -2,6 +2,7 @@ package com.example.myapplicationds.ui.addedit
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,8 +26,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.myapplicationds.ui.home.getCategoryIcon
-import com.example.myapplicationds.ui.theme.CategoryColors
+import com.example.myapplicationds.ui.components.GlassCard
+import com.example.myapplicationds.ui.components.getCategoryIconByName
+import com.example.myapplicationds.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -42,7 +44,7 @@ fun AddEditBillScreen(
     val currency by viewModel.currency.collectAsState()
     val context = LocalContext.current
 
-    val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
+    val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
@@ -55,371 +57,453 @@ fun AddEditBillScreen(
     var showNewCategoryDialog by remember { mutableStateOf(false) }
 
     val repeatOptions = listOf("None", "Daily", "Weekly", "Monthly", "Yearly")
-    val availableIcons = listOf("Bolt", "Home", "Subscriptions", "Shield", "CreditCard", "AccountBalance", "Wifi", "DirectionsCar", "LocalHospital", "School", "ShoppingCart")
+    val availableIcons = listOf("DirectionsCar", "ElectricBolt", "Smartphone", "Wifi", "AccountBalance", "Subscriptions", "CreditCard", "Home", "WaterDrop", "Tv", "Shield", "School", "ShoppingCart")
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (uiState.isEditing) "Edit Bill" else "Add New Bill",
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = TextPrimaryDark)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (uiState.isEditing) "Edit Bill" else "Add New Bill",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimaryDark
                 )
-            )
+            }
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = DarkBackground
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             if (uiState.errorMessage != null) {
                 Surface(
-                    color = MaterialTheme.colorScheme.errorContainer,
-                    shape = RoundedCornerShape(12.dp),
+                    color = StatusOverdue.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, StatusOverdue),
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = uiState.errorMessage!!,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.padding(12.dp),
-                        style = MaterialTheme.typography.bodyMedium
+                        color = StatusOverdue,
+                        modifier = Modifier.padding(14.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            // Bill Name
-            OutlinedTextField(
-                value = uiState.billName,
-                onValueChange = viewModel::onNameChange,
-                label = { Text("Bill Name *") },
+            GlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Receipt, contentDescription = null) }
-            )
-
-            // Amount
-            OutlinedTextField(
-                value = uiState.amount,
-                onValueChange = viewModel::onAmountChange,
-                label = { Text("Amount ($currency) *") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true,
-                leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) }
-            )
-
-            // Category Dropdown
-            ExposedDropdownMenuBox(
-                expanded = categoryExpanded,
-                onExpandedChange = { categoryExpanded = !categoryExpanded }
+                contentPadding = PaddingValues(20.dp)
             ) {
-                OutlinedTextField(
-                    value = uiState.category,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Category") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    leadingIcon = { Icon(Icons.Default.Category, contentDescription = null) }
-                )
-                ExposedDropdownMenu(
-                    expanded = categoryExpanded,
-                    onDismissRequest = { categoryExpanded = false }
-                ) {
-                    categories.forEach { cat ->
-                        DropdownMenuItem(
-                            text = { Text(cat.categoryName) },
-                            onClick = {
-                                viewModel.onCategoryChange(cat.categoryName)
-                                viewModel.onIconChange(cat.icon)
-                                viewModel.onColorChange(cat.color)
-                                categoryExpanded = false
-                            }
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    // Bill Name
+                    OutlinedTextField(
+                        value = uiState.billName,
+                        onValueChange = viewModel::onNameChange,
+                        label = { Text("Bill Name *", color = TextSecondaryDark) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryBlue,
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                            focusedTextColor = TextPrimaryDark,
+                            unfocusedTextColor = TextPrimaryDark
+                        ),
+                        leadingIcon = { Icon(Icons.Default.Receipt, contentDescription = null, tint = PrimaryBlueLight) }
+                    )
+
+                    // Amount
+                    OutlinedTextField(
+                        value = uiState.amount,
+                        onValueChange = viewModel::onAmountChange,
+                        label = { Text("Amount ($currency) *", color = TextSecondaryDark) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryBlue,
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                            focusedTextColor = TextPrimaryDark,
+                            unfocusedTextColor = TextPrimaryDark
+                        ),
+                        leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, tint = PrimaryBlueLight) }
+                    )
+
+                    // Category Dropdown
+                    ExposedDropdownMenuBox(
+                        expanded = categoryExpanded,
+                        onExpandedChange = { categoryExpanded = !categoryExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = uiState.category,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Category", color = TextSecondaryDark) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryBlue,
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                                focusedTextColor = TextPrimaryDark,
+                                unfocusedTextColor = TextPrimaryDark
+                            ),
+                            leadingIcon = { Icon(Icons.Default.Category, contentDescription = null, tint = PrimaryBlueLight) }
                         )
+                        ExposedDropdownMenu(
+                            expanded = categoryExpanded,
+                            onDismissRequest = { categoryExpanded = false },
+                            modifier = Modifier.background(DarkSurface)
+                        ) {
+                            categories.forEach { cat ->
+                                DropdownMenuItem(
+                                    text = { Text(cat.categoryName, color = TextPrimaryDark) },
+                                    onClick = {
+                                        viewModel.onCategoryChange(cat.categoryName)
+                                        viewModel.onIconChange(cat.icon)
+                                        viewModel.onColorChange(cat.color)
+                                        categoryExpanded = false
+                                    }
+                                )
+                            }
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.08f), modifier = Modifier.padding(vertical = 4.dp))
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.Add, contentDescription = null, tint = PrimaryBlueLight, modifier = Modifier.size(20.dp))
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Add New Category...", color = PrimaryBlueLight, fontWeight = FontWeight.Bold)
+                                    }
+                                },
+                                onClick = {
+                                    categoryExpanded = false
+                                    showNewCategoryDialog = true
+                                }
+                            )
+                        }
                     }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                    DropdownMenuItem(
-                        text = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Add New Category...", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+
+                    // Due Date Picker
+                    OutlinedTextField(
+                        value = dateFormat.format(Date(uiState.dueDate)),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Due Date", color = TextSecondaryDark) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryBlue,
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                            focusedTextColor = TextPrimaryDark,
+                            unfocusedTextColor = TextPrimaryDark
+                        ),
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                val cal = Calendar.getInstance().apply { timeInMillis = uiState.dueDate }
+                                DatePickerDialog(
+                                    context,
+                                    { _, year, month, dayOfMonth ->
+                                        val selectedCal = Calendar.getInstance().apply {
+                                            set(year, month, dayOfMonth)
+                                        }
+                                        viewModel.onDueDateChange(selectedCal.timeInMillis)
+                                    },
+                                    cal.get(Calendar.YEAR),
+                                    cal.get(Calendar.MONTH),
+                                    cal.get(Calendar.DAY_OF_MONTH)
+                                ).show()
+                            }) {
+                                Icon(Icons.Default.CalendarToday, contentDescription = "Pick Due Date", tint = PrimaryBlueLight)
                             }
                         },
-                        onClick = {
-                            categoryExpanded = false
-                            showNewCategoryDialog = true
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val cal = Calendar.getInstance().apply { timeInMillis = uiState.dueDate }
+                                DatePickerDialog(
+                                    context,
+                                    { _, year, month, dayOfMonth ->
+                                        val selectedCal = Calendar.getInstance().apply {
+                                            set(year, month, dayOfMonth)
+                                        }
+                                        viewModel.onDueDateChange(selectedCal.timeInMillis)
+                                    },
+                                    cal.get(Calendar.YEAR),
+                                    cal.get(Calendar.MONTH),
+                                    cal.get(Calendar.DAY_OF_MONTH)
+                                ).show()
+                            },
+                        shape = RoundedCornerShape(16.dp)
+                    )
+
+                    // Reminder Date & Time Pickers
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = dateFormat.format(Date(uiState.reminderDate)),
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Reminder Date", color = TextSecondaryDark) },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryBlue,
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                                focusedTextColor = TextPrimaryDark,
+                                unfocusedTextColor = TextPrimaryDark
+                            ),
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    val cal = Calendar.getInstance().apply { timeInMillis = uiState.reminderDate }
+                                    DatePickerDialog(
+                                        context,
+                                        { _, year, month, dayOfMonth ->
+                                            val selectedCal = Calendar.getInstance().apply {
+                                                set(year, month, dayOfMonth)
+                                            }
+                                            viewModel.onReminderDateChange(selectedCal.timeInMillis)
+                                        },
+                                        cal.get(Calendar.YEAR),
+                                        cal.get(Calendar.MONTH),
+                                        cal.get(Calendar.DAY_OF_MONTH)
+                                    ).show()
+                                }) {
+                                    Icon(Icons.Default.Notifications, contentDescription = null, tint = PrimaryBlueLight)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+
+                        OutlinedTextField(
+                            value = uiState.reminderTime,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Time", color = TextSecondaryDark) },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryBlue,
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                                focusedTextColor = TextPrimaryDark,
+                                unfocusedTextColor = TextPrimaryDark
+                            ),
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    val parts = uiState.reminderTime.split(":")
+                                    val hour = parts.getOrNull(0)?.toIntOrNull() ?: 9
+                                    val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+
+                                    TimePickerDialog(
+                                        context,
+                                        { _, selectedHour, selectedMinute ->
+                                            val formattedTime = String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
+                                            viewModel.onReminderTimeChange(formattedTime)
+                                        },
+                                        hour,
+                                        minute,
+                                        true
+                                    ).show()
+                                }) {
+                                    Icon(Icons.Default.AccessTime, contentDescription = null, tint = PrimaryBlueLight)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                    }
+
+                    // Repeat Dropdown
+                    ExposedDropdownMenuBox(
+                        expanded = repeatExpanded,
+                        onExpandedChange = { repeatExpanded = !repeatExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = uiState.recurringType,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Repeat Frequency", color = TextSecondaryDark) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = repeatExpanded) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryBlue,
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                                focusedTextColor = TextPrimaryDark,
+                                unfocusedTextColor = TextPrimaryDark
+                            ),
+                            leadingIcon = { Icon(Icons.Default.Repeat, contentDescription = null, tint = PrimaryBlueLight) }
+                        )
+                        ExposedDropdownMenu(
+                            expanded = repeatExpanded,
+                            onDismissRequest = { repeatExpanded = false },
+                            modifier = Modifier.background(DarkSurface)
+                        ) {
+                            repeatOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option, color = TextPrimaryDark) },
+                                    onClick = {
+                                        viewModel.onRecurringTypeChange(option)
+                                        repeatExpanded = false
+                                    }
+                                )
+                            }
                         }
+                    }
+
+                    // Notes
+                    OutlinedTextField(
+                        value = uiState.notes,
+                        onValueChange = viewModel::onNotesChange,
+                        label = { Text("Notes (Optional)", color = TextSecondaryDark) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        minLines = 3,
+                        maxLines = 5,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryBlue,
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                            focusedTextColor = TextPrimaryDark,
+                            unfocusedTextColor = TextPrimaryDark
+                        ),
+                        leadingIcon = { Icon(Icons.Default.Note, contentDescription = null, tint = PrimaryBlueLight) }
                     )
                 }
             }
 
-            // Due Date Picker
-            OutlinedTextField(
-                value = dateFormat.format(Date(uiState.dueDate)),
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Due Date") },
-                trailingIcon = {
-                    IconButton(onClick = {
-                        val cal = Calendar.getInstance().apply { timeInMillis = uiState.dueDate }
-                        DatePickerDialog(
-                            context,
-                            { _, year, month, dayOfMonth ->
-                                val selectedCal = Calendar.getInstance().apply {
-                                    set(year, month, dayOfMonth)
-                                }
-                                viewModel.onDueDateChange(selectedCal.timeInMillis)
-                            },
-                            cal.get(Calendar.YEAR),
-                            cal.get(Calendar.MONTH),
-                            cal.get(Calendar.DAY_OF_MONTH)
-                        ).show()
-                    }) {
-                        Icon(Icons.Default.CalendarToday, contentDescription = "Pick Due Date")
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        val cal = Calendar.getInstance().apply { timeInMillis = uiState.dueDate }
-                        DatePickerDialog(
-                            context,
-                            { _, year, month, dayOfMonth ->
-                                val selectedCal = Calendar.getInstance().apply {
-                                    set(year, month, dayOfMonth)
-                                }
-                                viewModel.onDueDateChange(selectedCal.timeInMillis)
-                            },
-                            cal.get(Calendar.YEAR),
-                            cal.get(Calendar.MONTH),
-                            cal.get(Calendar.DAY_OF_MONTH)
-                        ).show()
-                    },
-                shape = RoundedCornerShape(16.dp)
-            )
-
-            // Reminder Date & Time Pickers
-            Row(
+            // Category Icons & Color Selector Card
+            GlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                contentPadding = PaddingValues(20.dp)
             ) {
-                // Reminder Date
-                OutlinedTextField(
-                    value = dateFormat.format(Date(uiState.reminderDate)),
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Reminder Date") },
-                    trailingIcon = {
-                        IconButton(onClick = {
-                            val cal = Calendar.getInstance().apply { timeInMillis = uiState.reminderDate }
-                            DatePickerDialog(
-                                context,
-                                { _, year, month, dayOfMonth ->
-                                    val selectedCal = Calendar.getInstance().apply {
-                                        set(year, month, dayOfMonth)
-                                    }
-                                    viewModel.onReminderDateChange(selectedCal.timeInMillis)
-                                },
-                                cal.get(Calendar.YEAR),
-                                cal.get(Calendar.MONTH),
-                                cal.get(Calendar.DAY_OF_MONTH)
-                            ).show()
-                        }) {
-                            Icon(Icons.Default.Notifications, contentDescription = null)
-                        }
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp)
-                )
-
-                // Reminder Time
-                OutlinedTextField(
-                    value = uiState.reminderTime,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Time") },
-                    trailingIcon = {
-                        IconButton(onClick = {
-                            val parts = uiState.reminderTime.split(":")
-                            val hour = parts.getOrNull(0)?.toIntOrNull() ?: 9
-                            val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
-
-                            TimePickerDialog(
-                                context,
-                                { _, selectedHour, selectedMinute ->
-                                    val formattedTime = String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
-                                    viewModel.onReminderTimeChange(formattedTime)
-                                },
-                                hour,
-                                minute,
-                                true
-                            ).show()
-                        }) {
-                            Icon(Icons.Default.AccessTime, contentDescription = null)
-                        }
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp)
-                )
-            }
-
-            // Repeat Dropdown
-            ExposedDropdownMenuBox(
-                expanded = repeatExpanded,
-                onExpandedChange = { repeatExpanded = !repeatExpanded }
-            ) {
-                OutlinedTextField(
-                    value = uiState.recurringType,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Repeat Frequency") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = repeatExpanded) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    leadingIcon = { Icon(Icons.Default.Repeat, contentDescription = null) }
-                )
-                ExposedDropdownMenu(
-                    expanded = repeatExpanded,
-                    onDismissRequest = { repeatExpanded = false }
-                ) {
-                    repeatOptions.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option) },
-                            onClick = {
-                                viewModel.onRecurringTypeChange(option)
-                                repeatExpanded = false
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Text(
+                        text = "Category Icon",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimaryDark
+                    )
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(availableIcons) { iconName ->
+                            val isSelected = uiState.icon == iconName
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(
+                                        if (isSelected) PrimaryBlue else Color(0x1F22222E)
+                                    )
+                                    .border(
+                                        BorderStroke(1.dp, if (isSelected) PrimaryBlueLight else Color.White.copy(alpha = 0.08f)),
+                                        RoundedCornerShape(14.dp)
+                                    )
+                                    .clickable { viewModel.onIconChange(iconName) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = getCategoryIconByName(iconName, iconName),
+                                    contentDescription = iconName,
+                                    tint = if (isSelected) Color.White else TextSecondaryDark,
+                                    modifier = Modifier.size(24.dp)
+                                )
                             }
-                        )
+                        }
                     }
-                }
-            }
 
-            // Color Picker
-            Text(
-                text = "Color Theme",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(CategoryColors) { colorHex ->
-                    val isSelected = uiState.color == colorHex
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(Color(colorHex))
-                            .border(
-                                width = if (isSelected) 3.dp else 0.dp,
-                                color = if (isSelected) Color.White else Color.Transparent,
-                                shape = CircleShape
-                            )
-                            .clickable { viewModel.onColorChange(colorHex) },
-                        contentAlignment = Alignment.Center
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "Color Theme",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimaryDark
+                    )
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        if (isSelected) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = Color.White
-                            )
+                        items(CategoryColors) { colorHex ->
+                            val isSelected = uiState.color == colorHex
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(colorHex))
+                                    .border(
+                                        width = if (isSelected) 3.dp else 0.dp,
+                                        color = if (isSelected) Color.White else Color.Transparent,
+                                        shape = CircleShape
+                                    )
+                                    .clickable { viewModel.onColorChange(colorHex) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = Color.White
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            // Icon Picker
-            Text(
-                text = "Icon Selector",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(availableIcons) { iconName ->
-                    val isSelected = uiState.icon == iconName
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-                            )
-                            .clickable { viewModel.onIconChange(iconName) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = getCategoryIcon(iconName),
-                            contentDescription = iconName,
-                            tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Notes
-            OutlinedTextField(
-                value = uiState.notes,
-                onValueChange = viewModel::onNotesChange,
-                label = { Text("Notes (Optional)") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                minLines = 3,
-                maxLines = 5,
-                leadingIcon = { Icon(Icons.Default.Note, contentDescription = null) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Action Buttons
+            // Action Buttons Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedButton(
                     onClick = onNavigateBack,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
                 ) {
-                    Text("Cancel", fontWeight = FontWeight.Bold)
+                    Text("Cancel", fontWeight = FontWeight.Bold, color = TextPrimaryDark)
                 }
 
                 Button(
                     onClick = viewModel::saveBill,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = PrimaryBlue
                     )
                 ) {
-                    Text("Save Bill", fontWeight = FontWeight.Bold)
+                    Text("Save Bill", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 16.sp)
                 }
             }
+
+            Spacer(modifier = Modifier.height(60.dp))
         }
+
         if (showNewCategoryDialog) {
             NewCategoryDialog(
                 availableIcons = availableIcons,
@@ -446,40 +530,49 @@ fun NewCategoryDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("New Category") },
+        containerColor = DarkSurface,
+        shape = RoundedCornerShape(24.dp),
+        title = { Text("New Category", color = TextPrimaryDark, fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Category Name") },
+                    label = { Text("Category Name", color = TextSecondaryDark) },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    singleLine = true
+                    shape = RoundedCornerShape(14.dp),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryBlue,
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                        focusedTextColor = TextPrimaryDark,
+                        unfocusedTextColor = TextPrimaryDark
+                    )
                 )
 
-                Text("Select Icon", style = MaterialTheme.typography.titleSmall)
+                Text("Select Icon", style = MaterialTheme.typography.titleSmall, color = TextPrimaryDark)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(availableIcons) { icon ->
                         val isSelected = selectedIcon == icon
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (isSelected) PrimaryBlue else Color(0x1F22222E))
                                 .clickable { selectedIcon = icon },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = getCategoryIcon(icon),
+                                imageVector = getCategoryIconByName(icon, icon),
                                 contentDescription = null,
-                                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = if (isSelected) Color.White else TextSecondaryDark,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
                 }
 
-                Text("Select Color", style = MaterialTheme.typography.titleSmall)
+                Text("Select Color", style = MaterialTheme.typography.titleSmall, color = TextPrimaryDark)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(CategoryColors) { color ->
                         val isSelected = selectedColor == color
@@ -507,15 +600,17 @@ fun NewCategoryDialog(
         confirmButton = {
             Button(
                 onClick = { if (name.isNotBlank()) onConfirm(name, selectedIcon, selectedColor) },
-                enabled = name.isNotBlank()
+                enabled = name.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
             ) {
-                Text("Add")
+                Text("Add", fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Cancel", color = TextSecondaryDark)
             }
         }
     )
 }
+

@@ -24,51 +24,35 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = TextPrimaryDark,
     surfaceVariant = DarkSurfaceVariant,
     onSurfaceVariant = TextSecondaryDark,
-    outline = DarkCardBorder
+    outline = GlassBorderWhite
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = PrimaryBlue,
-    onPrimary = LightSurface,
-    primaryContainer = PrimaryBlueLight,
-    onPrimaryContainer = TextPrimaryLight,
-    secondary = PrimaryBlueDark,
-    onSecondary = LightSurface,
-    background = LightBackground,
-    onBackground = TextPrimaryLight,
-    surface = LightSurface,
-    onSurface = TextPrimaryLight,
-    surfaceVariant = LightSurfaceVariant,
-    onSurfaceVariant = TextSecondaryLight,
-    outline = DarkCardBorder
-)
+private val LightColorScheme = DarkColorScheme // Default to Pure Black Glass Theme
 
 val BillBuddyShapes = Shapes(
     small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(20.dp), // Premium 20dp rounded cards as requested!
-    extraLarge = RoundedCornerShape(28.dp)
+    medium = RoundedCornerShape(18.dp),  // 18dp rounded search bar & controls
+    large = RoundedCornerShape(24.dp),   // 24dp rounded glass cards as requested!
+    extraLarge = RoundedCornerShape(28.dp) // 28dp rounded floating nav bar
 )
 
 @Composable
 fun BillBuddyTheme(
-    themeMode: String = "DARK", // "DARK", "LIGHT", "SYSTEM"
+    themeMode: String = "DARK", // Always prioritize Black Glass UI
     content: @Composable () -> Unit
 ) {
-    val darkTheme = when (themeMode) {
-        "LIGHT" -> false
-        "SYSTEM" -> isSystemInDarkTheme()
-        else -> true // Default to premium dark theme
-    }
+    val darkTheme = true // Black Glassmorphism theme by default
 
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = DarkColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            window.navigationBarColor = colorScheme.background.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
         }
     }
 
@@ -79,3 +63,4 @@ fun BillBuddyTheme(
         content = content
     )
 }
+
