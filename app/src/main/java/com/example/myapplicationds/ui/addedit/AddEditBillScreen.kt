@@ -51,6 +51,7 @@ fun AddEditBillScreen(
 
     var categoryExpanded by remember { mutableStateOf(false) }
     var repeatExpanded by remember { mutableStateOf(false) }
+    var showNewCategoryDialog by remember { mutableStateOf(false) }
 
     val repeatOptions = listOf("None", "Daily", "Weekly", "Monthly", "Yearly")
     val availableIcons = listOf("Bolt", "Home", "Subscriptions", "Shield", "CreditCard", "AccountBalance", "Wifi", "DirectionsCar", "LocalHospital", "School", "ShoppingCart")
@@ -418,15 +419,16 @@ fun AddEditBillScreen(
                 }
             }
         }
-    if (showNewCategoryDialog) {
-        NewCategoryDialog(
-            availableIcons = availableIcons,
-            onDismiss = { showNewCategoryDialog = false },
-            onConfirm = { name, icon, color ->
-                viewModel.addNewCategory(name, icon, color)
-                showNewCategoryDialog = false
-            }
-        )
+        if (showNewCategoryDialog) {
+            NewCategoryDialog(
+                availableIcons = availableIcons,
+                onDismiss = { showNewCategoryDialog = false },
+                onConfirm = { name, icon, color ->
+                    viewModel.addNewCategory(name, icon, color)
+                    showNewCategoryDialog = false
+                }
+            )
+        }
     }
 }
 
