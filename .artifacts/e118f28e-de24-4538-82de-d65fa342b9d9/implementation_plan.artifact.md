@@ -1,40 +1,31 @@
-# Build Time & App Size Optimization Plan
+# Implementation Plan - Custom Categories
 
-The current project can be optimized for both faster builds and a smaller app size. The main issues are memory constraints in Gradle, inefficient dependency usage, and disabled code shrinking.
-
-## User Review Required
-
-> [!IMPORTANT]
-> **Removing Material Icons Extended**: I am proposing to remove the `material-icons-extended` library. This library is very large and significantly slows down builds and increases APK size. I will replace the few icons used from it with local vector assets or standard icons to keep the app working perfectly.
+Add the ability for users to create their own bill categories with custom names, icons, and colors.
 
 ## Proposed Changes
 
-### Build System & Performance
+### UI Layer
 
-#### [MODIFY] [gradle.properties](file:///C:/androifff/gradle.properties)
-- Increase Gradle Heap size from 2GB to 4GB.
-- Enable Parallel execution.
-- Enable Build Cache and Configuration Cache.
+#### [MODIFY] [AddEditBillViewModel.kt](file:///C:/androifff/app/src/main/java/com/example/myapplicationds/ui/addedit/AddEditBillViewModel.kt)
+- Add `addNewCategory(name: String, icon: String, color: Long)` to the ViewModel.
+- This function will:
+    - Insert a new `CategoryEntity` into the database via `BillRepository`.
+    - Automatically update the current bill's category state to use the new category.
 
-### App Size Reduction (R8)
-
-#### [MODIFY] [app/build.gradle.kts](file:///C:/androifff/app/build.gradle.kts)
-- Enable `isMinifyEnabled` for the release build.
-- Enable `isShrinkResources` for the release build.
-- Remove `libs.compose.material.icons.extended`.
-
-### Dependency Cleaning
-
-#### [MODIFY] [Compose Screens]
-- Update imports to use standard icons where possible.
-- If specific "extended" icons are needed, I will add them as local XML files instead of pulling in the entire library.
+#### [MODIFY] [AddEditBillScreen.kt](file:///C:/androifff/app/src/main/java/com/example/myapplicationds/ui/addedit/AddEditBillScreen.kt)
+- Implement a `NewCategoryDialog` to collect:
+    - Category Name (Text)
+    - Icon (Selected from the existing `availableIcons` list)
+    - Color (Selected from the existing `CategoryColors` list)
+- Add a special "Add New Category..." item at the end of the category dropdown list.
+- When selected, show the `NewCategoryDialog`.
 
 ## Verification Plan
 
-### Automated Tests
-- Run `./gradlew assembleRelease` to ensure the app builds with minification enabled.
-- Check for any `ClassNotFoundException` in logs which might indicate missing R8 keep rules (unlikely for this simple app but good to verify).
-
 ### Manual Verification
-- Compare APK size before and after.
-- Verify all icons in the UI are still visible.
+1. Navigate to the **Add Bill** screen.
+2. Tap the **Category** dropdown.
+3. Scroll to the bottom and tap **Add New Category...**.
+4. Fill in the details in the dialog and tap **Add**.
+5. Confirm that the new category is now selected and visible in the dropdown.
+6. Save the bill and ensure it shows the correct custom category on the Home screen.
