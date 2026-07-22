@@ -45,7 +45,6 @@ fun HomeScreen(
     val paidCount by viewModel.paidCount.collectAsState()
 
     var billToDelete by remember { mutableStateOf<BillEntity?>(null) }
-    var isRefreshing by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -362,7 +361,7 @@ fun BillCardItem(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
             Spacer(modifier = Modifier.height(12.dp))
 
             // Details Row: Due Date, Reminder Time & Recurring Type
