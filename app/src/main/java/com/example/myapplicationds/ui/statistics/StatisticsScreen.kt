@@ -10,9 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -124,162 +122,286 @@ fun StatisticsScreen(
                 )
             }
 
-            // Category Spending Pie Chart Card
+            // Chart View Selector (Bar Graph, Pie Chart, Line Graph)
+            var selectedChartType by remember { mutableStateOf("BAR") } // "BAR", "PIE", "LINE"
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf("BAR" to "📊 Bar Graph", "PIE" to "🍕 Pie Chart", "LINE" to "📈 Line Graph").forEach { (typeKey, label) ->
+                    val isSelected = selectedChartType == typeKey
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { selectedChartType = typeKey },
+                        label = { Text(label, fontWeight = FontWeight.Bold, color = if (isSelected) Color.White else TextSecondaryDark) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = PrimaryBlue,
+                            containerColor = Color(0x1F22222E)
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            // Dynamic Analytics Chart Glass Card
             GlassCard(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(20.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.PieChart,
-                        contentDescription = null,
-                        tint = PrimaryBlueLight,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "Category Breakdown",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimaryDark
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = when (selectedChartType) {
+                                "PIE" -> Icons.Default.PieChart
+                                "LINE" -> Icons.Default.ShowChart
+                                else -> Icons.Default.BarChart
+                            },
+                            contentDescription = null,
+                            tint = PrimaryBlueLight,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = when (selectedChartType) {
+                                "PIE" -> "Category Pie Breakdown"
+                                "LINE" -> "Cash Flow Trend Line"
+                                else -> "Category Spending Bars"
+                            },
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimaryDark
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 if (categoryExpenses.isEmpty()) {
                     Text(
-                        text = "No category data available yet.",
+                        text = "No analytics data available yet.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextSecondaryDark
                     )
                 } else {
-                    val totalSum = categoryExpenses.sumOf { it.totalAmount }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(130.dp)
-                                .padding(4.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Canvas(modifier = Modifier.fillMaxSize()) {
-                                var startAngle = -90f
-                                val strokeWidth = 32f
+                    when (selectedChartType) {
+                        "PIE" -> {
+                            // Pie Chart Renderer
+                            val totalSum = categoryExpenses.sumOf { it.totalAmount }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(130.dp)
+                                        .padding(4.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Canvas(modifier = Modifier.fillMaxSize()) {
+                                        var startAngle = -90f
+                                        val strokeWidth = 32f
 
-                                categoryExpenses.forEach { exp ->
-                                    val sweepAngle = if (totalSum > 0) {
-                                        ((exp.totalAmount / totalSum) * 360f).toFloat()
-                                    } else 0f
+                                        categoryExpenses.forEach { exp ->
+                                            val sweepAngle = if (totalSum > 0) {
+                                                ((exp.totalAmount / totalSum) * 360f).toFloat()
+                                            } else 0f
 
-                                    drawArc(
-                                        color = Color(exp.color),
-                                        startAngle = startAngle,
-                                        sweepAngle = sweepAngle,
-                                        useCenter = false,
-                                        style = Stroke(width = strokeWidth)
-                                    )
-                                    startAngle += sweepAngle
+                                            drawArc(
+                                                color = Color(exp.color),
+                                                startAngle = startAngle,
+                                                sweepAngle = sweepAngle,
+                                                useCenter = false,
+                                                style = Stroke(width = strokeWidth)
+                                            )
+                                            startAngle += sweepAngle
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(20.dp))
+
+                                // Pie Chart Legends
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    categoryExpenses.take(5).forEach { exp ->
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(10.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color(exp.color))
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = exp.categoryName,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = TextSecondaryDark,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Text(
+                                                text = "$currency${String.format(Locale.getDefault(), "%.0f", exp.totalAmount)}",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = TextPrimaryDark
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(20.dp))
+                        "LINE" -> {
+                            // Smooth Canvas Line Graph Renderer
+                            val maxAmount = categoryExpenses.maxOf { it.totalAmount }.coerceAtLeast(1.0)
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp)
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Canvas(modifier = Modifier.fillMaxSize()) {
+                                        val width = size.width
+                                        val height = size.height
+                                        val pointsCount = categoryExpenses.size
+                                        val spacing = width / (pointsCount.coerceAtLeast(2) - 1).coerceAtLeast(1)
 
-                        // Pie Chart Legends
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            categoryExpenses.take(5).forEach { exp ->
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(10.dp)
-                                            .clip(CircleShape)
-                                            .background(Color(exp.color))
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = exp.categoryName,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = TextSecondaryDark,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    Text(
-                                        text = "$currency${String.format(Locale.getDefault(), "%.0f", exp.totalAmount)}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextPrimaryDark
-                                    )
+                                        val path = androidx.compose.ui.graphics.Path()
+                                        val fillPath = androidx.compose.ui.graphics.Path()
+
+                                        categoryExpenses.forEachIndexed { index, exp ->
+                                            val x = index * spacing
+                                            val y = height - ((exp.totalAmount / maxAmount) * (height - 30f)).toFloat() - 15f
+
+                                            if (index == 0) {
+                                                path.moveTo(x, y)
+                                                fillPath.moveTo(x, height)
+                                                fillPath.lineTo(x, y)
+                                            } else {
+                                                val prevX = (index - 1) * spacing
+                                                val prevY = height - ((categoryExpenses[index - 1].totalAmount / maxAmount) * (height - 30f)).toFloat() - 15f
+                                                val controlX1 = prevX + (spacing / 2f)
+                                                val controlY1 = prevY
+                                                val controlX2 = prevX + (spacing / 2f)
+                                                val controlY2 = y
+
+                                                path.cubicTo(controlX1, controlY1, controlX2, controlY2, x, y)
+                                                fillPath.cubicTo(controlX1, controlY1, controlX2, controlY2, x, y)
+                                            }
+
+                                            // Draw data point circles
+                                            drawCircle(
+                                                color = Color(exp.color),
+                                                radius = 6f,
+                                                center = androidx.compose.ui.geometry.Offset(x, y)
+                                            )
+                                        }
+
+                                        fillPath.lineTo(width, height)
+                                        fillPath.close()
+
+                                        // Draw filled area below line
+                                        drawPath(
+                                            path = fillPath,
+                                            brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                                colors = listOf(PrimaryBlue.copy(alpha = 0.35f), Color.Transparent)
+                                            )
+                                        )
+
+                                        // Draw smooth line
+                                        drawPath(
+                                            path = path,
+                                            color = PrimaryBlue,
+                                            style = Stroke(width = 3.dp.toPx())
+                                        )
+                                    }
                                 }
-                            }
-                        }
-                    }
-                }
-            }
 
-            // Category Bar Chart Card
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(20.dp)
-            ) {
-                Text(
-                    text = "Category Spending Bars",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimaryDark
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
 
-                if (categoryExpenses.isNotEmpty()) {
-                    val maxAmount = categoryExpenses.maxOf { it.totalAmount }.coerceAtLeast(1.0)
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        categoryExpenses.take(6).forEach { exp ->
-                            Column {
+                                // Category Node Summary List
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = exp.categoryName,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = TextSecondaryDark
-                                    )
-                                    Text(
-                                        text = "$currency${String.format(Locale.getDefault(), "%.2f", exp.totalAmount)}",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextPrimaryDark
-                                    )
+                                    categoryExpenses.take(4).forEach { exp ->
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text(
+                                                text = exp.categoryName.take(6),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = TextSecondaryDark,
+                                                fontSize = 10.sp
+                                            )
+                                            Text(
+                                                text = "$currency${String.format(Locale.getDefault(), "%.0f", exp.totalAmount)}",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = PrimaryBlueLight,
+                                                fontSize = 11.sp
+                                            )
+                                        }
+                                    }
                                 }
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(10.dp)
-                                        .clip(RoundedCornerShape(5.dp))
-                                        .background(Color(0x1F22222E))
-                                ) {
-                                    val fraction = (exp.totalAmount / maxAmount).toFloat()
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxHeight()
-                                            .fillMaxWidth(fraction)
-                                            .clip(RoundedCornerShape(5.dp))
-                                            .background(Color(exp.color))
-                                    )
+                            }
+                        }
+
+                        else -> { // "BAR"
+                            // Category Bar Chart Renderer
+                            val maxAmount = categoryExpenses.maxOf { it.totalAmount }.coerceAtLeast(1.0)
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(14.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                categoryExpenses.take(6).forEach { exp ->
+                                    Column {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = exp.categoryName,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = TextSecondaryDark
+                                            )
+                                            Text(
+                                                text = "$currency${String.format(Locale.getDefault(), "%.2f", exp.totalAmount)}",
+                                                style = MaterialTheme.typography.labelLarge,
+                                                fontWeight = FontWeight.Bold,
+                                                color = TextPrimaryDark
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(10.dp)
+                                                .clip(RoundedCornerShape(5.dp))
+                                                .background(Color(0x1F22222E))
+                                        ) {
+                                            val fraction = (exp.totalAmount / maxAmount).toFloat()
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxHeight()
+                                                    .fillMaxWidth(fraction)
+                                                    .clip(RoundedCornerShape(5.dp))
+                                                    .background(Color(exp.color))
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+
 
             // Recent Payment History Card
             GlassCard(

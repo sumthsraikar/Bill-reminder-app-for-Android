@@ -113,11 +113,49 @@ fun AddEditBillScreen(
                 contentPadding = PaddingValues(20.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    // Transaction Type Selector (Debited vs Credited)
+                    Text(
+                        text = "Transaction Type",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimaryDark
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Debited (Expense)
+                        val isDebit = uiState.transactionType == "DEBIT"
+                        FilterChip(
+                            selected = isDebit,
+                            onClick = { viewModel.onTransactionTypeChange("DEBIT") },
+                            label = { Text("📤 Debited (Expense)", fontWeight = FontWeight.Bold, color = if (isDebit) Color.White else TextSecondaryDark) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = StatusOverdue,
+                                containerColor = Color(0x1F22222E)
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        // Credited (Income)
+                        val isCredit = uiState.transactionType == "CREDIT"
+                        FilterChip(
+                            selected = isCredit,
+                            onClick = { viewModel.onTransactionTypeChange("CREDIT") },
+                            label = { Text("📥 Credited (Income)", fontWeight = FontWeight.Bold, color = if (isCredit) Color.White else TextSecondaryDark) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = StatusPaid,
+                                containerColor = Color(0x1F22222E)
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
                     // Bill Name
                     OutlinedTextField(
                         value = uiState.billName,
                         onValueChange = viewModel::onNameChange,
-                        label = { Text("Bill Name *", color = TextSecondaryDark) },
+                        label = { Text(if (uiState.transactionType == "CREDIT") "Title / Source *" else "Bill Name *", color = TextSecondaryDark) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
                         singleLine = true,
@@ -129,6 +167,7 @@ fun AddEditBillScreen(
                         ),
                         leadingIcon = { Icon(Icons.Default.Receipt, contentDescription = null, tint = PrimaryBlueLight) }
                     )
+
 
                     // Amount
                     OutlinedTextField(

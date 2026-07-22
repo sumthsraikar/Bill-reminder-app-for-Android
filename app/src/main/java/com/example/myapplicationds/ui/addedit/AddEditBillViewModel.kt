@@ -20,6 +20,7 @@ data class AddEditUiState(
     val billName: String = "",
     val amount: String = "",
     val category: String = "Utilities",
+    val transactionType: String = "DEBIT", // "DEBIT" (Expense/Bill), "CREDIT" (Income/Credited)
     val dueDate: Long = System.currentTimeMillis() + 86400000L, // Tomorrow
     val reminderDate: Long = System.currentTimeMillis(),
     val reminderTime: String = "09:00",
@@ -60,6 +61,7 @@ class AddEditBillViewModel @Inject constructor(
                         billName = bill.billName,
                         amount = bill.amount.toString(),
                         category = bill.category,
+                        transactionType = bill.transactionType,
                         dueDate = bill.dueDate,
                         reminderDate = bill.reminderDate,
                         reminderTime = bill.reminderTime,
@@ -84,6 +86,10 @@ class AddEditBillViewModel @Inject constructor(
 
     fun onCategoryChange(category: String) {
         _uiState.update { it.copy(category = category) }
+    }
+
+    fun onTransactionTypeChange(type: String) {
+        _uiState.update { it.copy(transactionType = type) }
     }
 
     fun onDueDateChange(millis: Long) {
@@ -151,6 +157,7 @@ class AddEditBillViewModel @Inject constructor(
                 billName = name,
                 category = state.category,
                 amount = amountValue,
+                transactionType = state.transactionType,
                 dueDate = state.dueDate,
                 reminderDate = state.reminderDate,
                 reminderTime = state.reminderTime,
@@ -175,3 +182,4 @@ class AddEditBillViewModel @Inject constructor(
         }
     }
 }
+

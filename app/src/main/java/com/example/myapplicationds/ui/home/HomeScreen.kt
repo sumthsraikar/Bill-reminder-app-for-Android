@@ -2,6 +2,7 @@ package com.example.myapplicationds.ui.home
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -595,19 +596,40 @@ fun BillCardItem(
                 }
             }
 
-            // Amount Section (No "BILL AMOUNT" header label, 28sp Bold font size)
+            // Amount Section with Credited (+) vs Debited (-) styling
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "$currency${String.format(Locale.getDefault(), "%.2f", bill.amount)}",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
-                    color = TextPrimaryDark
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val isCredit = bill.transactionType == "CREDIT"
+                    Text(
+                        text = "${if (isCredit) "+" else "-"}$currency${String.format(Locale.getDefault(), "%.2f", bill.amount)}",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp,
+                        color = if (isCredit) StatusPaid else TextPrimaryDark
+                    )
+
+                    if (isCredit) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = StatusPaid.copy(alpha = 0.15f),
+                            border = BorderStroke(1.dp, StatusPaid.copy(alpha = 0.3f))
+                        ) {
+                            Text(
+                                text = "Credited",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = StatusPaid,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
 
                 // Frequency Chip beside amount / due date
                 if (bill.recurringType != "None") {
@@ -638,6 +660,7 @@ fun BillCardItem(
                     }
                 }
             }
+
 
             // Due Date & Reminder Row in Premium Glass Chip
             Surface(

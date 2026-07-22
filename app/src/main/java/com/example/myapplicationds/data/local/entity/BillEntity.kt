@@ -18,6 +18,8 @@ data class BillEntity(
     val color: Long = 0xFF2563EBL, // Default Blue Accent
     val icon: String = "Receipt",
     val paymentStatus: String = "UPCOMING", // "UPCOMING", "PAID", "OVERDUE"
+    val transactionType: String = "DEBIT", // "DEBIT" (Expense/Bill), "CREDIT" (Income/Credited)
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )
+
