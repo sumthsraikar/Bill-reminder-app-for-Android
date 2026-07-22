@@ -114,6 +114,21 @@ class AddEditBillViewModel @Inject constructor(
         _uiState.update { it.copy(notes = notes) }
     }
 
+    fun addNewCategory(name: String, icon: String, color: Long) {
+        viewModelScope.launch {
+            val newCategory = CategoryEntity(
+                categoryName = name,
+                icon = icon,
+                color = color
+            )
+            repository.insertCategory(newCategory)
+            // Select the newly created category
+            onCategoryChange(name)
+            onIconChange(icon)
+            onColorChange(color)
+        }
+    }
+
     fun saveBill() {
         val state = _uiState.value
         val name = state.billName.trim()
