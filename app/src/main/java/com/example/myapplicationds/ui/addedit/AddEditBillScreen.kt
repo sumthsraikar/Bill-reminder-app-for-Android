@@ -154,6 +154,20 @@ fun AddEditBillScreen(
                             }
                         )
                     }
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    DropdownMenuItem(
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Add New Category...", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            }
+                        },
+                        onClick = {
+                            categoryExpanded = false
+                            showNewCategoryDialog = true
+                        }
+                    )
                 }
             }
 
@@ -404,5 +418,101 @@ fun AddEditBillScreen(
                 }
             }
         }
+    if (showNewCategoryDialog) {
+        NewCategoryDialog(
+            availableIcons = availableIcons,
+            onDismiss = { showNewCategoryDialog = false },
+            onConfirm = { name, icon, color ->
+                viewModel.addNewCategory(name, icon, color)
+                showNewCategoryDialog = false
+            }
+        )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NewCategoryDialog(
+    availableIcons: List<String>,
+    onDismiss: () -> Unit,
+    onConfirm: (String, String, Long) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var selectedIcon by remember { mutableStateOf(availableIcons.first()) }
+    var selectedColor by remember { mutableStateOf(CategoryColors.first()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("New Category") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Category Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
+                )
+
+                Text("Select Icon", style = MaterialTheme.typography.titleSmall)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(availableIcons) { icon ->
+                        val isSelected = selectedIcon == icon
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                                .clickable { selectedIcon = icon },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = getCategoryIcon(icon),
+                                contentDescription = null,
+                                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                Text("Select Color", style = MaterialTheme.typography.titleSmall)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(CategoryColors) { color ->
+                        val isSelected = selectedColor == color
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color(color))
+                                .border(
+                                    width = if (isSelected) 2.dp else 0.dp,
+                                    color = if (isSelected) Color.White else Color.Transparent,
+                                    shape = CircleShape
+                                )
+                                .clickable { selectedColor = color },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isSelected) {
+                                Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { if (name.isNotBlank()) onConfirm(name, selectedIcon, selectedColor) },
+                enabled = name.isNotBlank()
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
