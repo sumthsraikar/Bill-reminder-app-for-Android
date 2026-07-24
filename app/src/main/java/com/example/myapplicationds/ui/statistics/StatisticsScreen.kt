@@ -43,6 +43,7 @@ fun StatisticsScreen(
     val categoryExpenses by viewModel.categoryExpenses.collectAsState()
     val totalCredited by viewModel.totalCredited.collectAsState()
     val totalDebited by viewModel.totalDebited.collectAsState()
+    val paymentHistory by viewModel.paymentHistory.collectAsState()
 
     val dateFormat = remember { SimpleDateFormat("dd MMM, yyyy • HH:mm", Locale.getDefault()) }
 

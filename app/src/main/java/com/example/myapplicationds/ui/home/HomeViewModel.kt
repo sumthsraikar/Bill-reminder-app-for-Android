@@ -19,38 +19,44 @@ class HomeViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _selectedTab = MutableStateFlow(0) // 0: Upcoming, 1: Overdue, 2: Paid
+    private val _selectedTab = MutableStateFlow(0) // 0: Debited, 1: Credited, 2: Upcoming
     val selectedTab: StateFlow<Int> = _selectedTab.asStateFlow()
 
     val currency: StateFlow<String> = repository.currencyFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "₹")
 
-    val upcomingCount: StateFlow<Int> = repository.getUpcomingCount()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    private val allBills = repository.getAllBills()
 
-    val overdueCount: StateFlow<Int> = repository.getOverdueCount()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    val debitedCount: StateFlow<Int> = allBills.map { list ->
+        list.count { it.transactionType != "CREDIT" }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    val paidCount: StateFlow<Int> = repository.getPaidCount()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    val creditedCount: StateFlow<Int> = allBills.map { list ->
+        list.count { it.transactionType == "CREDIT" }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val upcomingCount: StateFlow<Int> = allBills.map { list ->
+        list.count { it.paymentStatus == "UPCOMING" }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val bills: StateFlow<List<BillEntity>> = combine(
+        allBills,
         _selectedTab,
         _searchQuery
-    ) { tabIndex, query ->
-        val status = when (tabIndex) {
-            0 -> "UPCOMING"
-            1 -> "OVERDUE"
-            2 -> "PAID"
-            else -> "UPCOMING"
+    ) { list, tabIndex, query ->
+        val filteredByType = when (tabIndex) {
+            0 -> list.filter { it.transactionType != "CREDIT" }
+            1 -> list.filter { it.transactionType == "CREDIT" }
+            2 -> list.filter { it.paymentStatus == "UPCOMING" }
+            else -> list
         }
-        Pair(status, query)
-    }.flatMapLatest { (status, query) ->
+
         if (query.isBlank()) {
-            repository.getBillsByStatus(status)
+            filteredByType
         } else {
-            repository.searchBills(query).map { list ->
-                list.filter { it.paymentStatus == status }
+            filteredByType.filter {
+                it.billName.contains(query, ignoreCase = true) ||
+                it.category.contains(query, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

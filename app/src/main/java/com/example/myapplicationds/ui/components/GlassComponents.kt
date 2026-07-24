@@ -163,8 +163,7 @@ fun GlassPillTabs(
             .fillMaxWidth()
             .height(52.dp)
             .clip(RoundedCornerShape(26.dp))
-            .background(Color(0x1F121216))
-            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), RoundedCornerShape(26.dp)),
+            .background(Color(0x1F121216)),
         color = Color(0x18121218),
         shape = RoundedCornerShape(26.dp)
     ) {
@@ -187,9 +186,6 @@ fun GlassPillTabs(
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(22.dp))
                         .background(animBackground)
-                        .then(
-                            if (isSelected) Modifier.border(BorderStroke(1.dp, PrimaryBlue.copy(alpha = 0.5f)), RoundedCornerShape(22.dp)) else Modifier
-                        )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
@@ -200,22 +196,22 @@ fun GlassPillTabs(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
                         Text(
                             text = label,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isSelected) TextPrimaryDark else TextSecondaryDark,
-                            fontSize = 14.sp
+                            fontSize = 13.sp
                         )
 
                         // Circular count badge - hidden if count == 0
                         if (count > 0) {
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Box(
                                 modifier = Modifier
-                                    .size(20.dp)
+                                    .size(18.dp)
                                     .clip(CircleShape)
                                     .background(
                                         if (isSelected) PrimaryBlue else Color(0x26FFFFFF)
@@ -227,7 +223,7 @@ fun GlassPillTabs(
                                     style = MaterialTheme.typography.labelSmall,
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 11.sp
+                                    fontSize = 10.sp
                                 )
                             }
                         }

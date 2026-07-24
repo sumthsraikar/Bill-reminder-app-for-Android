@@ -88,8 +88,8 @@ fun AddEditBillScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (uiState.errorMessage != null) {
                 Surface(
@@ -108,12 +108,7 @@ fun AddEditBillScreen(
                 }
             }
 
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(20.dp)
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    // Transaction Type Selector (Debited vs Credited)
+            // Transaction Type Selector (Debited vs Credited)
                     Text(
                         text = "Transaction Type",
                         style = MaterialTheme.typography.titleMedium,
@@ -426,15 +421,10 @@ fun AddEditBillScreen(
                         ),
                         leadingIcon = { Icon(Icons.Default.Note, contentDescription = null, tint = PrimaryBlueLight) }
                     )
-                }
-            }
 
-            // Category Icons & Color Selector Card
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(20.dp)
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Category Icons & Color Selector
                     Text(
                         text = "Category Icon",
                         style = MaterialTheme.typography.titleLarge,
@@ -506,12 +496,10 @@ fun AddEditBillScreen(
                             }
                         }
                     }
-                }
-            }
 
-            Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-            // Action Buttons Row
+                    // Action Buttons Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
