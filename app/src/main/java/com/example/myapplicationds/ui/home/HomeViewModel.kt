@@ -19,7 +19,7 @@ class HomeViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _selectedTab = MutableStateFlow(0) // 0: Debited, 1: Credited, 2: Upcoming
+    private val _selectedTab = MutableStateFlow(0) // 0: Upcoming, 1: Debited, 2: Credited
     val selectedTab: StateFlow<Int> = _selectedTab.asStateFlow()
 
     val currency: StateFlow<String> = repository.currencyFlow
@@ -45,9 +45,9 @@ class HomeViewModel @Inject constructor(
         _searchQuery
     ) { list, tabIndex, query ->
         val filteredByType = when (tabIndex) {
-            0 -> list.filter { it.transactionType != "CREDIT" }
-            1 -> list.filter { it.transactionType == "CREDIT" }
-            2 -> list.filter { it.paymentStatus == "UPCOMING" }
+            0 -> list.filter { it.paymentStatus == "UPCOMING" }
+            1 -> list.filter { it.transactionType != "CREDIT" }
+            2 -> list.filter { it.transactionType == "CREDIT" }
             else -> list
         }
 

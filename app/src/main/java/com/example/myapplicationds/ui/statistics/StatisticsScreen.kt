@@ -18,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationds.ui.components.GlassCard
@@ -78,8 +80,8 @@ fun StatisticsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Credited vs Debited Cash Flow Summary Cards
             Row(
@@ -169,22 +171,43 @@ fun StatisticsScreen(
             // Chart View Selector (Bar Graph, Pie Chart, Line Graph)
             var selectedChartType by remember { mutableStateOf("BAR") } // "BAR", "PIE", "LINE"
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(22.dp)),
+                color = Color(0x1F121216),
+                shape = RoundedCornerShape(22.dp)
             ) {
-                listOf("BAR" to "📊 Bar Graph", "PIE" to "🍕 Pie Chart", "LINE" to "📈 Line Graph").forEach { (typeKey, label) ->
-                    val isSelected = selectedChartType == typeKey
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { selectedChartType = typeKey },
-                        label = { Text(label, fontWeight = FontWeight.Bold, color = if (isSelected) Color.White else TextSecondaryDark) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = PrimaryBlue,
-                            containerColor = Color(0x1F22222E)
-                        ),
-                        modifier = Modifier.weight(1f)
-                    )
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(3.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    listOf("BAR" to "📊 Bar Graph", "PIE" to "🍕 Pie Chart", "LINE" to "📈 Line Graph").forEach { (typeKey, label) ->
+                        val isSelected = selectedChartType == typeKey
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clip(RoundedCornerShape(19.dp))
+                                .background(if (isSelected) PrimaryBlue else Color.Transparent)
+                                .clickable { selectedChartType = typeKey },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) Color.White else TextSecondaryDark,
+                                fontSize = 12.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
                 }
             }
 
@@ -538,7 +561,7 @@ fun GlassMetricCard(
 ) {
     GlassCard(
         modifier = modifier,
-        contentPadding = PaddingValues(12.dp)
+        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 10.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -548,14 +571,18 @@ fun GlassMetricCard(
                 text = title,
                 style = MaterialTheme.typography.labelSmall,
                 color = TextSecondaryDark,
-                fontSize = 11.sp
+                fontSize = 10.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = count,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = color
+                color = color,
+                fontSize = 17.sp,
+                maxLines = 1
             )
         }
     }

@@ -160,12 +160,12 @@ fun HomeScreen(
                 }
             }
 
-            // Filter Tabs (Debited vs Credited vs Upcoming)
+            // Filter Tabs (Upcoming vs Debited vs Credited)
             item {
                 val tabs = listOf(
+                    "Upcoming" to upcomingCount,
                     "Debited" to debitedCount,
-                    "Credited" to creditedCount,
-                    "Upcoming" to upcomingCount
+                    "Credited" to creditedCount
                 )
 
                 Box(
@@ -184,9 +184,9 @@ fun HomeScreen(
                 item {
                     val (emptyTitle, emptySubtitle, emptyIcon) = when {
                         searchQuery.isNotBlank() -> Triple("No matching items", "Try searching with a different bill name or category", Icons.Default.Search)
-                        selectedTab == 0 -> Triple("No Debited Expenses", "You have zero expense bills recorded. Tap + New Bill to add one!", Icons.Default.ReceiptLong)
-                        selectedTab == 1 -> Triple("No Credited Income", "You have zero income/credited records. Tap + New Bill to add one!", Icons.Default.Payments)
-                        else -> Triple("No Upcoming Bills", "You have zero upcoming bills pending. Tap + New Bill to add one!", Icons.Default.Schedule)
+                        selectedTab == 0 -> Triple("No Upcoming Bills", "You have zero upcoming bills pending. Tap + New Bill to add one!", Icons.Default.Schedule)
+                        selectedTab == 1 -> Triple("No Debited Expenses", "You have zero expense bills recorded. Tap + New Bill to add one!", Icons.Default.ReceiptLong)
+                        else -> Triple("No Credited Income", "You have zero income/credited records. Tap + New Bill to add one!", Icons.Default.Payments)
                     }
 
                     Box(
@@ -496,7 +496,7 @@ fun BillCardItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     val isCredit = bill.transactionType == "CREDIT"
                     Text(
-                        text = "${if (isCredit) "+" else ""}$currency${String.format(Locale.getDefault(), "%,.0f", bill.amount)}",
+                        text = "${if (isCredit) "+" else "-"}$currency${String.format(Locale.getDefault(), "%,.0f", bill.amount)}",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         fontSize = 28.sp,
